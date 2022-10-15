@@ -14,4 +14,14 @@ class CompanyController extends Controller
     {
         return CompanyResource::collection(Company::all());
     }
+
+    public function show($id)
+    {
+        $employees = DB::table('companies')
+            ->join('employees', 'companies.id', '=', 'employees.company_id')
+            ->select('companies.id as company_id', 'companies.name', 'employees.id', 'employees.first_name', 'employees.last_name', 'employees.email')
+            ->where('companies.id', '=', $id)
+            ->get();
+        return response()->json($employees);
+    }
 }
