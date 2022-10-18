@@ -1,5 +1,11 @@
 <template>
     <div class="container mx-auto pt-2 pb-6 px-6">
+        <button
+            @click="handleCreateClick"
+            class="mb-3 px-4 py-2 rounded bg-green-500 hover:bg-green-600 text-white font-medium"
+        >
+            Create Employee
+        </button>
         <div
             class="shadow-md overflow-x-auto overflow-y-auto"
             style="max-height: 610px"
@@ -42,28 +48,69 @@
             </table>
         </div>
     </div>
+    <EmployeeCreateModal
+        :isOpen="createModalIsOpen"
+        :errors="createModalErrors"
+        @create-employee="createEmployee"
+    />
 </template>
 
 <script>
 import { BASE_URL } from "../constants";
+import EmployeeCreateModal from "./EmployeeCreateModal.vue";
 
 export default {
     name: "EmployeeTable",
+    components: {
+        EmployeeCreateModal,
+    },
     props: {
         companyId: Number,
     },
     data() {
         return {
             employees: [],
+            createModalIsOpen: false,
+            createModalErrors: {},
         };
     },
     methods: {
+        async createEmployee(employee) {
+            const res = await fetch(`${BASE_URL}employees/`, {
+                method: "POST",
+                headers: {
+                    Accept: "application/json",
+                    "Content-type": "application/json",
+                },
+                body: JSON.stringify({
+                    company_id: this.companyId,
+                    ...employee,
+                }),
+            });
+
+            if (res.status === 200) {
+                this.createModalIsOpen = false;
+                const data = await res.json();
+                this.employees = [...this.employees, data];
+                this.createModalErrors = {};
+            }
+
+            if (res.status === 422) {
+                const json = await res.json();
+                this.createModalErrors = json.errors;
+            }
+        },
+
         async fetchCompany(id) {
             const res = await fetch(`${BASE_URL}companies/${id}`);
 
             const data = await res.json();
 
             return data;
+        },
+
+        handleCreateClick() {
+            this.createModalIsOpen = true;
         },
     },
     async created() {

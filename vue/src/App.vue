@@ -1,5 +1,5 @@
 <template>
-    <main class="py-12 max-w-7xl mx-auto min-h-screen">
+    <main class="py-12 max-w-7xl mx-auto min-h-screen bg-slate-200">
         <div class="text-left" bis_skin_checked="1">
             <template v-for="company in companies" :key="company.id">
                 <div class="mx-20 mb-4 shadow rounded bg-white">
