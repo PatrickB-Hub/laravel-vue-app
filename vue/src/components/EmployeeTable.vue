@@ -20,6 +20,7 @@
                         <th class="py-3 pl-10">First Name</th>
                         <th class="py-3 pl-10">Last Name</th>
                         <th class="py-3 pl-10">Email</th>
+                        <th class="py-3 pl-10">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -42,6 +43,20 @@
                                     employee.email
                                 }}</span>
                             </td>
+                            <td class="pl-10">
+                                <button
+                                    @click="handleEditClick(employee)"
+                                    class="px-5 py-2 my-2 mr-4 rounded bg-blue-500 hover:bg-blue-600 text-white font-medium"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    @click="deleteEmployee(employee.id)"
+                                    class="px-5 py-2 my-2 rounded bg-red-500 hover:bg-red-600 text-white font-medium"
+                                >
+                                    Delete
+                                </button>
+                            </td>
                         </tr>
                     </template>
                 </tbody>
@@ -53,28 +68,47 @@
         :errors="createModalErrors"
         @create-employee="createEmployee"
     />
+    <EmployeeUpdateModal
+        :isOpen="updateModalIsOpen"
+        :employee="{ ...employee }"
+        :errors="updateModalErrors"
+        @update-employee="updateEmployee"
+    />
 </template>
 
 <script>
 import { BASE_URL } from "../constants";
 import EmployeeCreateModal from "./EmployeeCreateModal.vue";
+import EmployeeUpdateModal from "./EmployeeUpdateModal.vue";
 
 export default {
     name: "EmployeeTable",
     components: {
         EmployeeCreateModal,
+        EmployeeUpdateModal,
     },
     props: {
         companyId: Number,
     },
     data() {
         return {
+            employee: {},
             employees: [],
             createModalIsOpen: false,
+            updateModalIsOpen: false,
             createModalErrors: {},
+            updateModalErrors: {},
         };
     },
     methods: {
+        async fetchCompany(id) {
+            const res = await fetch(`${BASE_URL}companies/${id}`);
+
+            const data = await res.json();
+
+            return data;
+        },
+
         async createEmployee(employee) {
             const res = await fetch(`${BASE_URL}employees/`, {
                 method: "POST",
@@ -101,16 +135,58 @@ export default {
             }
         },
 
-        async fetchCompany(id) {
-            const res = await fetch(`${BASE_URL}companies/${id}`);
+        async updateEmployee(employee) {
+            const data = {
+                id: employee.id,
+                first_name: employee.first_name,
+                last_name: employee.last_name,
+                email: employee.email,
+                company_id: employee.company_id,
+            };
 
-            const data = await res.json();
+            const res = await fetch(`${BASE_URL}employees/${employee.id}`, {
+                method: "PUT",
+                headers: {
+                    Accept: "application/json",
+                    "Content-type": "application/json",
+                },
+                body: JSON.stringify(data),
+            });
 
-            return data;
+            if (res.status === 200) {
+                this.updateModalIsOpen = false;
+                const updatedEmployees = this.employees.map((e) =>
+                    e.id === employee.id ? { ...e, ...data } : e
+                );
+                this.employees = updatedEmployees;
+                this.updateModalErrors = {};
+            }
+
+            if (res.status === 422) {
+                const json = await res.json();
+                this.updateModalErrors = json.errors;
+            }
         },
 
+        async deleteEmployee(id) {
+            if (confirm("Are you sure?")) {
+                const res = await fetch(`${BASE_URL}employees/${id}`, {
+                    method: "DELETE",
+                });
+
+                res.status === 200
+                    ? (this.employees = this.employees.filter(
+                          (employee) => employee.id !== id
+                      ))
+                    : alert("Error deleting Employee");
+            }
+        },
         handleCreateClick() {
             this.createModalIsOpen = true;
+        },
+        handleEditClick(employee) {
+            this.employee = employee;
+            this.updateModalIsOpen = true;
         },
     },
     async created() {

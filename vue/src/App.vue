@@ -34,7 +34,7 @@ import { BASE_URL } from "./constants";
 import EmployeeTable from "./components/EmployeeTable.vue";
 
 export default {
-    name: "App",
+    name: "Home",
     components: {
         EmployeeTable,
     },
