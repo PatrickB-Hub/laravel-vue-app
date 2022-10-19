@@ -4,8 +4,8 @@
             v-show="isOpen"
             class="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-70"
         >
-            <div class="max-w-2xl p-6 bg-white rounded-md shadow-xl">
-                <div class="flex items-center justify-between">
+            <div class="max-w-xl w-full p-8 bg-white rounded-md shadow-xl">
+                <div class="px-6 flex items-center justify-between">
                     <h3 class="text-2xl">Edit Employee</h3>
                     <svg
                         @click="isOpen = false"
@@ -24,7 +24,7 @@
                     </svg>
                 </div>
                 <div class="mt-6">
-                    <form class="max-w-md mx-auto px-10" @submit.prevent="">
+                    <form class="max-w-md mx-auto" @submit.prevent="">
                         <div class="space-y-6">
                             <div class="mb-6">
                                 <label
