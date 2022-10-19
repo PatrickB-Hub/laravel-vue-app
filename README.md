@@ -1,4 +1,4 @@
-# [Laravel-Vue-App]
+# Laravel-Vue-App
 
 Laravel REST-Api with vue.js CRUD functionality.
 
